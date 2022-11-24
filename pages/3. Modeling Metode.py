@@ -76,7 +76,6 @@ filenameModelKnnNorm = 'modelKnnNorm.pkl'
 joblib.dump(knn, filenameModelKnnNorm)
 
 # inisialisasi model gausian
-# training the model on training set
 from sklearn.naive_bayes import GaussianNB
 gnb = GaussianNB()
 gnb.fit(X_train, y_train)
@@ -87,6 +86,30 @@ joblib.dump(gnb, filenameModelGau)
 y_pred = gnb.predict(X_test)
 
 vg = f'Hasil akurasi dari pemodelan Gausian : {accuracy_score(y_test, y_pred) * 100 :.2f} %'
+
+# inisialisasi model decision tree
+from sklearn.tree import DecisionTreeClassifier
+d3 = DecisionTreeClassifier()
+d3.fit(X_train, y_train)
+
+filenameModeld3 = 'modeld3.pkl'
+joblib.dump(d3, filenameModeld3)
+
+y_pred = d3.predict(X_test)
+
+vd3 = f'Hasil akurasi dari pemodelan decision tree : {accuracy_score(y_test, y_pred) * 100 :.2f} %'
+
+# inisialisasi model k-mean
+from sklearn.cluster import KMeans
+km = KMeans()
+km.fit(X_train, y_train)
+
+filenameModelkm = 'modelkm.pkl'
+joblib.dump(km, filenameModelkm)
+
+y_pred = km.predict(X_test)
+
+vkm = f'Hasil akurasi dari pemodelan k-means clustering : {accuracy_score(y_test, y_pred) * 100 :.2f} %'
 
 # tampilan tabs
 K_Nearest_Naighbour, Gausian, Decision_Tree, K_Mean = st.tabs(["K-Nearest aighbour", "Naive Bayes Gausian", "Decision Tree", "K-Mean"])
@@ -116,7 +139,6 @@ with Gausian:
     st.write("Metode yang juga dikenal sebagai Naive Bayes Classifier ini menerapkan teknik supervised klasifikasi objek di masa depan dengan menetapkan label kelas ke instance/catatan menggunakan probabilitas bersyarat. \nProbabilitas bersyarat adalah ukuran peluang suatu peristiwa yang terjadi berdasarkan peristiwa lain yang telah (dengan asumsi, praduga, pernyataan, atau terbukti) terjadi \nRumus: P(A│B) = P(B│A)P(A)P(B). Adapun salah satu jenis naive bayes adalah gausian. Distribusi Gaussian adalah asumsi pendistribusian nilai kontinu yang terkait dengan setiap fitur berisi nilai numerik. Ketika diplot, akan muncul kurva berbentuk lonceng yang simetris tentang rata-rata nilai fitur.")
     st.header("Pengkodean")
     st.text("""
-    my_param_grid = {'n_neighbors':[2,3,5,7], 'weights': ['distance', 'uniform']}
     from sklearn.naive_bayes import GaussianNB
     gnb = GaussianNB()
     gnb.fit(X_train, y_train)
@@ -135,14 +157,36 @@ with Decision_Tree:
     st.header("Decision Tree")
     st.write("Konsep Decision tree  adalah dengan cara menyajikan algoritma dengan pernyataan bersyarat, \nyang meliputi cabang untuk mewakili langkah-langkah pengambilan keputusan yang dapat mengarah pada hasil yang menguntungkan.")
     st.header("Pengkodean")
-    st.text("Hello world")
+    st.text(""" 
+    from sklearn.tree import DecisionTreeClassifier
+    d3 = DecisionTreeClassifier()
+    d3.fit(X_train, y_train)
+
+    filenameModeld3 = 'modeld3.pkl'
+    joblib.dump(d3, filenameModeld3)
+
+    y_pred = d3.predict(X_test)
+
+    vd3 = f'Hasil akurasi dari pemodelan decision tree : {accuracy_score(y_test, y_pred) * 100 :.2f} %'
+    """)
     st.header("Hasil Akurasi")
-    st.write("Hasil akurasi dari pemodelan Decision Tree: 48%")   
+    st.write(vd3)   
 
 with K_Mean:
     st.header("K-Means")
     st.write("Prinsip utama K-Means adalah menyusun k prototype atau pusat massa (centroid) dari sekumpulan data berdimensi. \nSebelum diterapkan proses algoritma K-means, dokumen akan di preprocessing terlebih dahulu. Kemudian dokumen direpresentasikan sebagai vektor yang memiliki term dengan nilai tertentu.")
     st.header("Pengkodean")
-    st.text("Hello world")
+    st.text(""" 
+    from sklearn.cluster import kmean
+    km = kmean()
+    km.fit(X_train, y_train)
+
+    filenameModelkm = 'modelkm.pkl'
+    joblib.dump(km, filenameModelkm)
+
+    y_pred = km.predict(X_test)
+
+    vkm = f'Hasil akurasi dari pemodelan decision tree : {accuracy_score(y_test, y_pred) * 100 :.2f} %'
+    """)
     st.header("Hasil Akurasi")
-    st.write("Hasil akurasi dari pemodelan K-Means: 48%")
+    st.write(vkm)

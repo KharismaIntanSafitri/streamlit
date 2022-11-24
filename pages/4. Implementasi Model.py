@@ -39,8 +39,12 @@ t = st.number_input("Temperatur")
 l = st.number_input("Luminocity")
 r = st.number_input("Radius")
 ma = st.number_input("Absolute Magnitudo")
-clr = st.text_input("Color", "General Color of Spectrum", )
-sp = st.text_input('Type of Spectral',"O,B,A,F,G,K,M" )
+clr = st.selectbox(
+    'Color',
+    ('Blue', 'Blue White', 'Orange', 'Orang-Red', 'Pale yellow orange', 'Red', 'White', 'White-Yellow', 'Whitish', 'Yellowish', 'Yellowish White', 'yellow-White' ))
+sp = st.selectbox(
+    'Magnitudo Absolute',
+    ('A', 'B', 'F', 'G', 'K', 'M', 'O'))
 
 def submit():
     # input
@@ -104,6 +108,30 @@ def submit():
 
     vg = f'Hasil akurasi dari pemodelan Gausian : {accuracy_score(y_test, y_pred) * 100 :.2f} %'
 
+    # inisialisasi model decision tree
+    from sklearn.tree import DecisionTreeClassifier
+    d3 = DecisionTreeClassifier()
+    d3.fit(X_train, y_train)
+
+    filenameModeld3 = 'modeld3.pkl'
+    joblib.dump(d3, filenameModeld3)
+
+    y_pred = d3.predict(X_test)
+
+    vd3 = f'Hasil akurasi dari pemodelan decision tree : {accuracy_score(y_test, y_pred) * 100 :.2f} %'
+
+    # inisialisasi kmean
+    from sklearn.cluster import KMeans
+    km = KMeans()
+    km.fit(X_train, y_train)
+
+    filenameModelkm = 'modelkm.pkl'
+    joblib.dump(km, filenameModelkm)
+
+    y_pred = km.predict(X_test)
+
+    vkm = f'Hasil akurasi dari pemodelan k-means clustering : {accuracy_score(y_test, y_pred) * 100 :.2f} %'
+
     # olah Inputan
     a = np.array([[t, l, r, ma, clr, sp ]])
 
@@ -120,13 +148,21 @@ def submit():
     test_d = scaler.fit_transform(test_data)
     # pd.DataFrame(test_d)
 
-    # knn load
+    # load knn
     knn = joblib.load(filenameModelKnnNorm)
     pred = knn.predict(test_d)
 
     # load gausian
     gnb = joblib.load(filenameModelGau)
     pred = gnb.predict(test_d)
+
+    # load gdecision tree
+    d3 = joblib.load(filenameModeld3)
+    pred = d3.predict(test_d)
+
+    # load kmean
+    km = joblib.load(filenameModelkm)
+    pred = km.predict(test_d)
 
 
 
@@ -179,11 +215,39 @@ def submit():
 
     with Decision_Tree:
         st.subheader("Model Decision Tree")
-        st.write("Hasil Klasifikaisi : ? ")
+        pred = d3.predict(test_d)
+        if pred[0]== 0:
+            st.write("Hasil Klasifikaisi : Red Dwarf")
+        elif pred[0]== 1 :
+            st.write("Hasil Klasifikaisi : Brown Dwarf")
+        elif pred[0]== 2:
+            st.write("Hasil Klasifikaisi : White Dwarf")
+        elif pred[0]== 3:
+            st.write("Hasil Klasifikaisi : Main Sequence")
+        elif pred[0]== 4:
+            st.write("Hasil Klasifikaisi : Super Giants ")
+        elif pred[0]== 5:
+            st.write("Hasil Klasifikaisi : Hyper Giants")
+        else:
+            st.write("Hasil Klasifikaisi : New Category")
 
     with K_Mean:
         st.subheader("Model K-Means")
-        st.write("Hasil Klasifikaisi : ? ")
+        pred = km.predict(test_d)
+        if pred[0]== 0:
+            st.write("Hasil Klasifikaisi : Red Dwarf")
+        elif pred[0]== 1 :
+            st.write("Hasil Klasifikaisi : Brown Dwarf")
+        elif pred[0]== 2:
+            st.write("Hasil Klasifikaisi : White Dwarf")
+        elif pred[0]== 3:
+            st.write("Hasil Klasifikaisi : Main Sequence")
+        elif pred[0]== 4:
+            st.write("Hasil Klasifikaisi : Super Giants ")
+        elif pred[0]== 5:
+            st.write("Hasil Klasifikaisi : Hyper Giants")
+        else:
+            st.write("Hasil Klasifikaisi : New Category")
 
 submitted = st.button("Submit")
 if submitted:
