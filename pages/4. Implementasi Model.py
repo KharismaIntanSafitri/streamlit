@@ -28,8 +28,6 @@ px.defaults.color_continuous_scale = "reds"
 st.markdown("#4. Implementasi Model")
 
 
-# st.header("Input Data Sample")
-# datain = st.text_input('Masukkan dataset', '')
 st.title("Implementasi Model")
 st.write("Sebagai bahan eksperimen silahkan inputkan beberapa data yang akan digunakan sebagai data testing untuk pengklasifikasian")
 
@@ -48,24 +46,23 @@ sp = st.selectbox(
 
 def submit():
     # input
-    data = pd.read_csv("https://raw.githubusercontent.com/KharismaIntanSafitri/datamining/main/data_bintang_acak.csv")
-    X = data.drop(columns=["Type"])
-
-        #  dataset NORMALISASI
-        #  Tahap Normalisasi data sting ke kategori
+    header  = ['Temperatur', 'Luminious', 'Radius', 'Magnitudo Absolute', 'Color',"Spectral Type", "Type" ]
+    url = "https://raw.githubusercontent.com/KharismaIntanSafitri/datamining/main/data_bintang_acak.csv" 
+    data = pd.read_csv(url, names = header)
+    data = data.drop(0, axis=0)
+    X = data.drop(columns=['Type'])
     X = pd.DataFrame(X)
     X['Color'] = X['Color'].astype('category')
-    X['Spectral_Class'] = X['Spectral_Class'].astype('category')
+    X["Spectral Type"] = X["Spectral Type"].astype('category')
     cat_columns = X.select_dtypes(['category']).columns
     X[cat_columns] = X[cat_columns].apply(lambda x: x.cat.codes)
-        
+
     scaler = MinMaxScaler()
-        #scaler.fit(features)
-    #scaler.transform(features)
-    scaled = scaler.fit_transform(X)
+    cut = scaler.fit_transform(X.drop(columns=["Color", "Spectral Type"]))
+    scaled = np.column_stack([cut, X[["Color", "Spectral Type"]]])
     features_names = X.columns.copy()
-    #features_names.remove('label')
     scaled_features = pd.DataFrame(scaled, columns=features_names)
+
 
     import joblib
     filename = "normalisasi_bintang.sav"
@@ -95,8 +92,7 @@ def submit():
     filenameModelKnnNorm = 'modelKnnNorm.pkl'
     joblib.dump(knn, filenameModelKnnNorm)
 
-    # inisialisasi model gausian
-    # training the model on training set
+   # inisialisasi model gausian
     from sklearn.naive_bayes import GaussianNB
     gnb = GaussianNB()
     gnb.fit(X_train, y_train)
@@ -120,27 +116,30 @@ def submit():
 
     vd3 = f'Hasil akurasi dari pemodelan decision tree : {accuracy_score(y_test, y_pred) * 100 :.2f} %'
 
-    # inisialisasi kmean
-    from sklearn.cluster import KMeans
-    km = KMeans()
-    km.fit(X_train, y_train)
+    # inisialisasi model k-mean
+    from sklearn.ensemble import BaggingClassifier
+    bagging = BaggingClassifier(
+    base_estimator = gnb,
+    n_estimators = 300,
+    max_samples = 0.9,
+    oob_score = True
+    )
+    bagging.fit(X_train, y_train)
 
-    filenameModelkm = 'modelkm.pkl'
-    joblib.dump(km, filenameModelkm)
+    filenameModelBagg = 'modelBagg.pkl'
+    joblib.dump(bagging, filenameModelBagg)
 
-    y_pred = km.predict(X_test)
-
-    vkm = f'Hasil akurasi dari pemodelan k-means clustering : {accuracy_score(y_test, y_pred) * 100 :.2f} %'
-
+    y_pred = bagging.predict(X_test)
+    vbag = f'Hasil akurasi dari pemodelan bagging : {accuracy_score(y_test, y_pred) * 100 :.2f} %'
     # olah Inputan
     a = np.array([[t, l, r, ma, clr, sp ]])
 
     test_data = np.array(a).reshape(1, -1)
-    test_data = pd.DataFrame(test_data, columns =['Temperature', 'L', 'R', 'A_M', 'Color', 'Spectral_Class' ])
+    test_data = pd.DataFrame(test_data, columns =['Temperatur', 'Luminious', 'Radius', 'Magnitudo Absolute', 'Color','Spectral Type' ])
 
     test_data = pd.DataFrame(test_data)
     test_data['Color'] = test_data['Color'].astype('category')
-    test_data['Spectral_Class'] = test_data['Spectral_Class'].astype('category')
+    test_data['Spectral Type'] = test_data['Spectral Type'].astype('category')
     cat_columns = test_data.select_dtypes(['category']).columns
     test_data[cat_columns] = test_data[cat_columns].apply(lambda x: x.cat.codes)
 
@@ -148,7 +147,7 @@ def submit():
     test_d = scaler.fit_transform(test_data)
     # pd.DataFrame(test_d)
 
-    # load knn
+    # load knnv
     knn = joblib.load(filenameModelKnnNorm)
     pred = knn.predict(test_d)
 
@@ -161,8 +160,8 @@ def submit():
     pred = d3.predict(test_d)
 
     # load kmean
-    km = joblib.load(filenameModelkm)
-    pred = km.predict(test_d)
+    bagging = joblib.load(filenameModelBagg)
+    pred = bagging.predict(test_d)
 
 
 
@@ -174,7 +173,7 @@ def submit():
     st.dataframe(a)
     
     st.header("Hasil Prediksi")
-    K_Nearest_Naighbour, Naive_Bayes, Decision_Tree, K_Mean = st.tabs(["K-Nearest aighbour", "Naive Bayes Gausian", "Decision Tree", "K-Mean"])
+    K_Nearest_Naighbour, Naive_Bayes, Decision_Tree, Bagging = st.tabs(["K-Nearest aighbour", "Naive Bayes Gausian", "Decision Tree", "Bagging"])
     
     with K_Nearest_Naighbour:
         st.subheader("Model K-Nearest Neighbour")
@@ -231,9 +230,9 @@ def submit():
         else:
             st.write("Hasil Klasifikaisi : New Category")
 
-    with K_Mean:
-        st.subheader("Model K-Means")
-        pred = km.predict(test_d)
+    with Bagging:
+        st.subheader("Model Bagging")
+        pred = bagging.predict(test_d)
         if pred[0]== 0:
             st.write("Hasil Klasifikaisi : Red Dwarf")
         elif pred[0]== 1 :

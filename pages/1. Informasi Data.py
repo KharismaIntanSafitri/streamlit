@@ -20,11 +20,11 @@ st.header("Informasi Data")
 st.write("""
 Dalam dataset yang digunakan terdapat beberapa variabel untuk pengklasifikasian bintang:
 * Temperatur          : Satuan Kelvin (K)
-* L                   : Luminosity  / Lo -> ( Lo = 3.828 x 10^26 Watts)
-* R                   : Radius / Ro -> ( Ro = 6.9551 x 10^8 m)
-* A_M                 : Magnitudo absolute dalam satuan Mv
+* Luminious           : Luminosity  / Lo -> ( Lo = 3.828 x 10^26 Watts)
+* Radius              : Radius / Ro -> ( Ro = 6.9551 x 10^8 m)
+* Magnitudo Absolute  : Magnitudo absolute dalam satuan Mv
 * Color               : General Color of Spectrum
-* Spectral_Type       : O,B,A,F,G,K,M
+* Spectral Type       : O,B,A,F,G,K,M
 
 Adapun target Pengklasifikasian dengan pengkodean 0-5 dapat dilihat sebagai berikut:
 * Red Dwarf - 0
@@ -36,5 +36,11 @@ Adapun target Pengklasifikasian dengan pengkodean 0-5 dapat dilihat sebagai beri
 """)
 
 st.header("Sumber Data")
-st.write("Dataset yang digunakan dalam percobaan ini diambil dari Kagle dengan jumlah data sebanyak 140 data dengan 6 fitur dengan target pengelompokan menjadi 5 jeis bintang")
+st.write("Dataset yang digunakan dalam percobaan ini diambil dari Kagle dengan jumlah data sebanyak 241 data dengan 6 fitur dengan target pengelompokan menjadi 5 jeis bintang")
 st.caption('link datasets : https://github.com/KharismaIntanSafitri/datamining/blob/main/data%20bintang%20-%20Sheet1.csv')
+data = "https://raw.githubusercontent.com/KharismaIntanSafitri/datamining/main/data_bintang_acak.csv"
+header  = ['Temperatur', 'Luminious', 'Radius', 'Magnitudo Absolute', 'Color',"Spectral Type ", "Type" ]
+df = pd.read_csv(data, names=header )
+df = df.head()
+hapus = df.drop(0, axis=0)
+st.dataframe(hapus)

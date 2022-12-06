@@ -16,7 +16,7 @@ from sklearn.neural_network import MLPClassifier
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.cluster import KMeans
 from sklearn.tree import DecisionTreeClassifier
-from sklearn.model_selection import GridSearchCV
+from sklearn.model_selection import GridSearchCV  
 from sklearn.metrics import accuracy_score
 import os,sys
 from scipy import stats
@@ -28,23 +28,22 @@ px.defaults.color_continuous_scale = "reds"
 st.markdown("#3. Modeling Data")
 
     # ambil data
-data = pd.read_csv("https://raw.githubusercontent.com/KharismaIntanSafitri/datamining/main/data_bintang_acak.csv")
-X = data.drop(columns=["Type"])
+url = "https://raw.githubusercontent.com/KharismaIntanSafitri/datamining/main/data_bintang_acak.csv"
 
-    #  dataset NORMALISASI
-    #  Tahap Normalisasi data sting ke kategori
+header  = ['Temperatur', 'Luminious', 'Radius', 'Magnitudo Absolute', 'Color',"Spectral Type", "Type" ]
+data = pd.read_csv(url, names = header)
+data = data.drop(0, axis=0)
+X = data.drop(columns=['Type'])
 X = pd.DataFrame(X)
 X['Color'] = X['Color'].astype('category')
-X['Spectral_Class'] = X['Spectral_Class'].astype('category')
+X["Spectral Type"] = X["Spectral Type"].astype('category')
 cat_columns = X.select_dtypes(['category']).columns
 X[cat_columns] = X[cat_columns].apply(lambda x: x.cat.codes)
-    
+
 scaler = MinMaxScaler()
-    #scaler.fit(features)
-#scaler.transform(features)
-scaled = scaler.fit_transform(X)
+cut = scaler.fit_transform(X.drop(columns=["Color", "Spectral Type"]))
+scaled = np.column_stack([cut, X[["Color", "Spectral Type"]]])
 features_names = X.columns.copy()
-#features_names.remove('label')
 scaled_features = pd.DataFrame(scaled, columns=features_names)
 
 import joblib
@@ -100,19 +99,22 @@ y_pred = d3.predict(X_test)
 vd3 = f'Hasil akurasi dari pemodelan decision tree : {accuracy_score(y_test, y_pred) * 100 :.2f} %'
 
 # inisialisasi model k-mean
-from sklearn.cluster import KMeans
-km = KMeans()
-km.fit(X_train, y_train)
+from sklearn.ensemble import BaggingClassifier
+bagging = BaggingClassifier(
+base_estimator = gnb,
+n_estimators = 300,
+max_samples = 0.9,
+oob_score = True
+)
+bagging.fit(X_train, y_train)
 
-filenameModelkm = 'modelkm.pkl'
-joblib.dump(km, filenameModelkm)
+filenameModelBagg = 'modelBagg.pkl'
+joblib.dump(bagging, filenameModelBagg)
 
-y_pred = km.predict(X_test)
-
-vkm = f'Hasil akurasi dari pemodelan k-means clustering : {accuracy_score(y_test, y_pred) * 100 :.2f} %'
-
+y_pred = bagging.predict(X_test)
+vbag = f'Hasil akurasi dari pemodelan bagging : {accuracy_score(y_test, y_pred) * 100 :.2f} %'
 # tampilan tabs
-K_Nearest_Naighbour, Gausian, Decision_Tree, K_Mean = st.tabs(["K-Nearest aighbour", "Naive Bayes Gausian", "Decision Tree", "K-Mean"])
+K_Nearest_Naighbour, Gausian, Decision_Tree, Bagging = st.tabs(["K-Nearest aighbour", "Naive Bayes Gausian", "Decision Tree", "Bagging"])
 
 
 with K_Nearest_Naighbour:
@@ -172,21 +174,25 @@ with Decision_Tree:
     st.header("Hasil Akurasi")
     st.write(vd3)   
 
-with K_Mean:
-    st.header("K-Means")
-    st.write("Prinsip utama K-Means adalah menyusun k prototype atau pusat massa (centroid) dari sekumpulan data berdimensi. \nSebelum diterapkan proses algoritma K-means, dokumen akan di preprocessing terlebih dahulu. Kemudian dokumen direpresentasikan sebagai vektor yang memiliki term dengan nilai tertentu.")
+with Bagging:
+    st.header("Bagging")
+    st.write("Bagging merupakan metode yang dapat memperbaiki hasil dari algoritma klasifikasi machine learning dengan menggabungkan klasifikasi prediksi dari beberapa model. Hal ini digunakan untuk mengatasi ketidakstabilan pada model yang kompleks dengan kumpulan data yang relatif kecil.")
     st.header("Pengkodean")
     st.text(""" 
-    from sklearn.cluster import kmean
-    km = kmean()
-    km.fit(X_train, y_train)
+    bagging = BaggingClassifier(
+    base_estimator = gnb,
+    n_estimators = 300,
+    max_samples = 0.9,
+    oob_score = True
+    )
+    bagging.fit(X_train, y_train)
 
-    filenameModelkm = 'modelkm.pkl'
-    joblib.dump(km, filenameModelkm)
+    filenameModelBagg = 'modelBagg.pkl'
+    joblib.dump(bagging, filenameModelBagg)
 
-    y_pred = km.predict(X_test)
+    y_pred = bagging.predict(X_test)
 
-    vkm = f'Hasil akurasi dari pemodelan decision tree : {accuracy_score(y_test, y_pred) * 100 :.2f} %'
+    vbag = f'acuracy = {accuracy_score(y_test, y_pred) * 100 :.2f}%'
     """)
     st.header("Hasil Akurasi")
-    st.write(vkm)
+    st.write(vbag)

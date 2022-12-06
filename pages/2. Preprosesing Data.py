@@ -31,37 +31,49 @@ st.markdown("#2. Preprosesing Data")
 # st.header("Input Data Sample")
 # datain = st.text_input('Masukkan dataset', '')
 st.title("Preprosesing Data")
-st.write("Preprocessing adalah proses menyiapkan data dasar atau inti sebelum melakukan proses lainnya. \nPada dasarnya data preprocessing dapat dilakukan dengan membuang data yang tidak sesuai atau mengubah data menjadi bentuk yang lebih mudah untuk diproses oleh sistem. \nProses pembersihan meliputi penghilangan duplikasi data, pengisian atau penghapusan data yang hilang, pembetulan data yang tidak konsisten, dan pembetulan salah ketik. \nSeperti namanya, normalisasi dapat diartikan secara sederhana sebagai proses menormalkan data dari hal-hal yang tidak sesuai.")
+st.write("""
+Preprocessing adalah proses menyiapkan data dasar atau inti sebelum melakukan proses lainnya. 
+\nPada dasarnya data preprocessing dapat dilakukan dengan membuang data yang tidak sesuai atau mengubah data menjadi bentuk yang lebih mudah untuk diproses oleh sistem. 
+\nProses pembersihan meliputi penghilangan duplikasi data, pengisian atau penghapusan data yang hilang, pembetulan data yang tidak konsisten, dan pembetulan salah ketik. 
+\nSeperti namanya, normalisasi dapat diartikan secara sederhana sebagai proses menormalkan data dari hal-hal yang tidak sesuai. 
+\nDalam proses klasifikasi bintang kali ini tahap yang dilakukan sebgaai berikut :
+\n1. Memisahkan data fitur dengan data target pada kolom Type, dengan cara mendrop kolom Type
+\n2. Merubah data kategorial dari kolom Color dan Spectral Type menjadi data numerik agar dapat dihitung
+\n3. Melakukan normalisasi data dengan menggunakan metode min-max scaler pada data fitur yang bertipe numerik untuk membuat beberapa variabel memiliki rentang nilai yang sama sehingga analisa statistik lebih mudah
+""")
 st.header("Import Data")
 uploaded_files = st.file_uploader("Upload file CSV", accept_multiple_files=True)
 for uploaded_file in uploaded_files:
     # uplod file
-    data = pd.read_csv(uploaded_file)
+    header  = ['Temperatur', 'Luminious', 'Radius', 'Magnitudo Absolute', 'Color',"Spectral Type", "Type" ]
+    data = pd.read_csv(uploaded_file, names=header )
     st.write(" **Nama File Anda :** ", uploaded_file.name)
    
     # view dataset asli
     st.header("Dataset Asli")
-    X = data.drop(columns=["Type"])
+    # X = data.drop(columns=["Type"])
+    X = data.drop(0, axis=0)
     st.dataframe(X)
     row, col = data.shape 
     st.caption(f"({row} rows, {col} cols)")
 
     # view dataset NORMALISASI
-    st.header("Dataset Normalisasi dan Transformasi")
+    st.header("Dataset Hasil Preprocessing")
     #  Tahap Normalisasi data sting ke kategori
     X = pd.DataFrame(X)
     X['Color'] = X['Color'].astype('category')
-    X['Spectral_Class'] = X['Spectral_Class'].astype('category')
+    X["Spectral Type"] = X["Spectral Type"].astype('category')
     cat_columns = X.select_dtypes(['category']).columns
     X[cat_columns] = X[cat_columns].apply(lambda x: x.cat.codes)
     
+    from sklearn.preprocessing import MinMaxScaler
+
     scaler = MinMaxScaler()
-    #scaler.fit(features)
-    #scaler.transform(features)
-    scaled = scaler.fit_transform(X)
+    cut = scaler.fit_transform(X.drop(columns=["Color", "Spectral Type"]))
+    scaled = np.column_stack([cut, X[["Color", "Spectral Type"]]])
     features_names = X.columns.copy()
-    #features_names.remove('label')
     scaled_features = pd.DataFrame(scaled, columns=features_names)
+    scaled_features = scaled_features.drop(columns=['Type'])
 
     st.dataframe( scaled_features)
     row, col = data.shape 
