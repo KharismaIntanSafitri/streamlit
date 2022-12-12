@@ -46,7 +46,6 @@ st.write("Menggunakan Link Dataset Berikut :")
 st.write("https://raw.githubusercontent.com/KharismaIntanSafitri/datamining/main/data_bintang_acak.csv")
 uploaded_files  = "https://raw.githubusercontent.com/KharismaIntanSafitri/datamining/main/data_bintang_acak.csv"
 
-    # uplod file
 header  = ['Temperatur', 'Luminious', 'Radius', 'Magnitudo Absolute', 'Color',"Spectral Type", "Type" ]
 data = pd.read_csv(uploaded_files, names=header )
    
