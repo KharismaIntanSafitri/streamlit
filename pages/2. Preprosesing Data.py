@@ -42,12 +42,11 @@ Preprocessing adalah proses menyiapkan data dasar atau inti sebelum melakukan pr
 \n3. Melakukan normalisasi data dengan menggunakan metode min-max scaler pada data fitur yang bertipe numerik untuk membuat beberapa variabel memiliki rentang nilai yang sama sehingga analisa statistik lebih mudah
 """)
 st.header("Import Data")
-uploaded_files = st.file_uploader("Upload file CSV", accept_multiple_files=True)
+uploaded_files  = st.text_input('Masukkan Link Dataset')
 for uploaded_file in uploaded_files:
     # uplod file
     header  = ['Temperatur', 'Luminious', 'Radius', 'Magnitudo Absolute', 'Color',"Spectral Type", "Type" ]
-    data = pd.read_csv(uploaded_file, names=header )
-    st.write(" **Nama File Anda :** ", uploaded_file.name)
+    data = pd.read_csv(uploaded_files, names=header )
    
     # view dataset asli
     st.header("Dataset Asli")
