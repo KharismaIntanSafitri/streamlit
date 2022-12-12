@@ -42,40 +42,43 @@ Preprocessing adalah proses menyiapkan data dasar atau inti sebelum melakukan pr
 \n3. Melakukan normalisasi data dengan menggunakan metode min-max scaler pada data fitur yang bertipe numerik untuk membuat beberapa variabel memiliki rentang nilai yang sama sehingga analisa statistik lebih mudah
 """)
 st.header("Import Data")
-uploaded_files  = st.text_input('Masukkan Link Dataset')
-for uploaded_file in uploaded_files:
+st.write("Menggunakan Link Dataset Berikut :")
+st.write("https://raw.githubusercontent.com/KharismaIntanSafitri/datamining/main/data_bintang_acak.csv")
+uploaded_files  = "https://raw.githubusercontent.com/KharismaIntanSafitri/datamining/main/data_bintang_acak.csv"
+
     # uplod file
-    header  = ['Temperatur', 'Luminious', 'Radius', 'Magnitudo Absolute', 'Color',"Spectral Type", "Type" ]
-    data = pd.read_csv(uploaded_files, names=header )
+header  = ['Temperatur', 'Luminious', 'Radius', 'Magnitudo Absolute', 'Color',"Spectral Type", "Type" ]
+data = pd.read_csv(uploaded_files, names=header )
    
     # view dataset asli
-    st.header("Dataset Asli")
+st.header("Dataset Asli")
     # X = data.drop(columns=["Type"])
-    X = data.drop(0, axis=0)
-    st.dataframe(X)
-    row, col = data.shape 
-    st.caption(f"({row} rows, {col} cols)")
+X = data.drop(0, axis=0)
+st.dataframe(X)
+row, col = data.shape 
+st.caption(f"({row} rows, {col} cols)")
 
     # view dataset NORMALISASI
-    st.header("Dataset Hasil Preprocessing")
+st.header("Dataset Hasil Preprocessing")
     #  Tahap Normalisasi data sting ke kategori
-    X = pd.DataFrame(X)
-    X['Color'] = X['Color'].astype('category')
-    X["Spectral Type"] = X["Spectral Type"].astype('category')
-    cat_columns = X.select_dtypes(['category']).columns
-    X[cat_columns] = X[cat_columns].apply(lambda x: x.cat.codes)
+X = pd.DataFrame(X)
+X['Color'] = X['Color'].astype('category')
+X["Spectral Type"] = X["Spectral Type"].astype('category')
+cat_columns = X.select_dtypes(['category']).columns
+X[cat_columns] = X[cat_columns].apply(lambda x: x.cat.codes)
     
-    from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import MinMaxScaler
 
-    scaler = MinMaxScaler()
-    cut = scaler.fit_transform(X.drop(columns=["Color", "Spectral Type"]))
-    scaled = np.column_stack([cut, X[["Color", "Spectral Type"]]])
-    features_names = X.columns.copy()
-    scaled_features = pd.DataFrame(scaled, columns=features_names)
-    scaled_features = scaled_features.drop(columns=['Type'])
+scaler = MinMaxScaler()
+cut = scaler.fit_transform(X.drop(columns=["Color", "Spectral Type"]))
+scaled = np.column_stack([cut, X[["Color", "Spectral Type"]]])
+features_names = X.columns.copy()
+scaled_features = pd.DataFrame(scaled, columns=features_names)
+scaled_features = scaled_features.drop(columns=['Type'])
 
-    st.dataframe( scaled_features)
-    row, col = data.shape 
-    st.caption(f"({row} rows, {col} cols)")
+st.dataframe( scaled_features)
+row, col = data.shape 
+st.caption(f"({row} rows, {col} cols)")
+    
 
   
